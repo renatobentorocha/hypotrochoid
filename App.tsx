@@ -7,14 +7,26 @@ import {
   PanGestureHandlerStateChangeEvent,
   State,
 } from 'react-native-gesture-handler';
-import Animated, { event } from 'react-native-reanimated';
+import Animated, {
+  add,
+  and,
+  cond,
+  eq,
+  event,
+  set,
+} from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
+
+import { Hypotrochoid } from './Hypotrochoid';
 
 const { width, height } = Dimensions.get('window');
 
 export default function App() {
   const translationX = useRef(new Animated.Value<number>(0)).current;
+  const offsetX = useRef(new Animated.Value<number>(0)).current;
   const gestureState = useRef(new Animated.Value<State>(State.UNDETERMINED))
+    .current;
+  const gestureOldState = useRef(new Animated.Value<State>(State.UNDETERMINED))
     .current;
 
   const innerRadius = 125.0;
@@ -75,15 +87,26 @@ export default function App() {
 
   const onHandlerStateChange = event<PanGestureHandlerStateChangeEvent>([
     {
-      nativeEvent: { state: gestureState },
+      nativeEvent: { state: gestureState, oldState: gestureOldState },
     },
   ]);
+
+  const translateX = cond(
+    eq(gestureState, State.ACTIVE),
+    add(offsetX, translationX),
+    cond(
+      and(eq(gestureOldState, State.ACTIVE), eq(gestureState, State.END)),
+      set(offsetX, add(offsetX, translationX)),
+      add(offsetX, translationX)
+    )
+  );
 
   return (
     <View style={styles.container}>
       <Svg width={width} height={360} viewBox={'-85 -75 200 200'}>
         <Path d={createPath()} fill="none" stroke={`hsl(${1}, 50%, 50%)`} />
       </Svg>
+      {/* <Hypotrochoid amount={translateX} /> */}
 
       <Animated.View style={{ alignItems: 'center' }}>
         <View
@@ -104,7 +127,7 @@ export default function App() {
                 borderRadius: 15,
                 backgroundColor: '#9c7878',
               },
-              { transform: [{ translateX: translationX }] },
+              { transform: [{ translateX }] },
             ]}
           />
         </PanGestureHandler>
