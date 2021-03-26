@@ -19,10 +19,10 @@
 # Configure expo (https://expo.io)
 
 # Clone this repository
-$ git clone https://github.com/renatobentorocha/PinchToZoom.git PinchToZoom
+$ git clone https://github.com/renatobentorocha/hypotrochoid.git Hypotrochoid
 
 # Go into the repository
-$ cd PinchToZoom
+$ cd Hypotrochoid
 
 # Install dependencies
 $ yarn
