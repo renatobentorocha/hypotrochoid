@@ -1,140 +1,118 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { useRef } from 'react';
-import { Dimensions, StyleSheet, Text, View } from 'react-native';
-import {
-  PanGestureHandler,
-  PanGestureHandlerGestureEvent,
-  PanGestureHandlerStateChangeEvent,
-  State,
-} from 'react-native-gesture-handler';
-import Animated, {
-  add,
-  and,
-  cond,
-  eq,
-  event,
-  set,
-} from 'react-native-reanimated';
-import Svg, { Path } from 'react-native-svg';
+import React from 'react';
+import { View, Dimensions, StyleSheet, SafeAreaView } from 'react-native';
 
-import { Hypotrochoid } from './Hypotrochoid';
+import Animated, {
+  useSharedValue,
+  useDerivedValue,
+} from 'react-native-reanimated';
+
+import { useAnimatedProps } from 'react-native-reanimated';
+
+import Svg, { G, Path } from 'react-native-svg';
+import { createPath } from './hypotrochoid';
+import { SlideControl } from './SlideControl';
 
 const { width, height } = Dimensions.get('window');
 
+const AnimatedPath = Animated.createAnimatedComponent(Path);
+
+Animated.addWhitelistedNativeProps({ d: true });
+Animated.addWhitelistedUIProps({ d: true });
+
 export default function App() {
-  const translationX = useRef(new Animated.Value<number>(0)).current;
-  const offsetX = useRef(new Animated.Value<number>(0)).current;
-  const gestureState = useRef(new Animated.Value<State>(State.UNDETERMINED))
-    .current;
-  const gestureOldState = useRef(new Animated.Value<State>(State.UNDETERMINED))
-    .current;
+  const translateXinnerRadius = useSharedValue(125.0);
+  const translateXouterRadius = useSharedValue(75.0);
+  const translateXdistance = useSharedValue(25.0);
+  const translateXhue = useSharedValue(1);
+  const translateXsaturation = useSharedValue(50);
+  const translateXlightness = useSharedValue(50);
 
-  const innerRadius = 125.0;
-  const outerRadius = 75.0;
-  const difference = innerRadius - outerRadius;
-  const distance = 25.0;
-  const amount = 1.0;
-  const hue = 0.6;
+  const innerRadius = useDerivedValue(() => {
+    return translateXinnerRadius.value;
+  });
 
-  const gcd = (a: number, b: number) => {
-    let _a = a;
-    let _b = b;
+  const outerRadius = useDerivedValue(() => {
+    return translateXouterRadius.value;
+  });
 
-    while (_b != 0) {
-      const temp = _b;
-      _b = _a % _b;
-      _a = temp;
-    }
+  const distance = useDerivedValue(() => {
+    return translateXdistance.value;
+  });
 
-    return _a;
-  };
+  const hue = useDerivedValue(() => {
+    return translateXhue.value;
+  });
 
-  const divisor = gcd(innerRadius, outerRadius);
-  const endPoint = Math.ceil((2 * Math.PI * outerRadius) / divisor) * amount;
+  const saturation = useDerivedValue(() => {
+    return translateXsaturation.value;
+  });
 
-  const createPath = () => {
-    const dPath = [];
-    let theta = 0;
-    const step = 0.01;
+  const lightness = useDerivedValue(() => {
+    return translateXlightness.value;
+  });
 
-    while (theta <= endPoint) {
-      const x =
-        difference * Math.cos(theta) +
-        distance * Math.cos((difference / outerRadius) * theta);
+  const animatedProps = useAnimatedProps(() => {
+    const d = createPath({
+      innerRadius,
+      outerRadius,
+      distance,
+    });
 
-      const y =
-        difference * Math.sin(theta) -
-        distance * Math.sin((difference / outerRadius) * theta);
-
-      if (theta === 0) {
-        dPath.push(`M${x} ${y}`);
-      } else {
-        dPath.push(`L${x} ${y}`);
-      }
-
-      theta += step;
-    }
-
-    console.log({ dPath: dPath.join().replaceAll(',', ' ') });
-    return dPath.join().replaceAll(',', ' ');
-  };
-
-  const onGestureEvent = event<PanGestureHandlerGestureEvent>([
-    {
-      nativeEvent: { translationX },
-    },
-  ]);
-
-  const onHandlerStateChange = event<PanGestureHandlerStateChangeEvent>([
-    {
-      nativeEvent: { state: gestureState, oldState: gestureOldState },
-    },
-  ]);
-
-  const translateX = cond(
-    eq(gestureState, State.ACTIVE),
-    add(offsetX, translationX),
-    cond(
-      and(eq(gestureOldState, State.ACTIVE), eq(gestureState, State.END)),
-      set(offsetX, add(offsetX, translationX)),
-      add(offsetX, translationX)
-    )
-  );
+    return {
+      d,
+      stroke: `hsl(${hue.value}, ${saturation.value}%, ${lightness.value}%)`,
+    };
+  });
 
   return (
-    <View style={styles.container}>
-      <Svg width={width} height={360} viewBox={'-85 -75 200 200'}>
-        <Path d={createPath()} fill="none" stroke={`hsl(${1}, 50%, 50%)`} />
-      </Svg>
-      {/* <Hypotrochoid amount={translateX} /> */}
-
-      <Animated.View style={{ alignItems: 'center' }}>
-        <View
-          style={{ width: width - 30, height: 5, backgroundColor: '#c3c3c3' }}
-        />
-        <PanGestureHandler
-          onGestureEvent={onGestureEvent}
-          onHandlerStateChange={onHandlerStateChange}
+    <SafeAreaView>
+      <View style={styles.container}>
+        <Svg
+          style={{
+            position: 'absolute',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          width={width}
+          height={height}
         >
-          <Animated.View
-            style={[
-              {
-                position: 'absolute',
-                top: -15,
-                left: 0,
-                width: 30,
-                height: 30,
-                borderRadius: 15,
-                backgroundColor: '#9c7878',
-              },
-              { transform: [{ translateX }] },
-            ]}
+          <G x={width / 2} y={height / 5}>
+            <AnimatedPath {...{ animatedProps }} fill="none" strokeWidth={2} />
+          </G>
+        </Svg>
+        <View style={{ flex: 1, justifyContent: 'flex-end' }}>
+          <SlideControl
+            style={{ marginBottom: 30 }}
+            title="Inner radius"
+            translateX={translateXinnerRadius}
           />
-        </PanGestureHandler>
-      </Animated.View>
+          <SlideControl
+            style={{ marginBottom: 30 }}
+            title="Outer radius"
+            translateX={translateXouterRadius}
+          />
+          <SlideControl
+            style={{ marginBottom: 30 }}
+            title="Distance"
+            translateX={translateXdistance}
+          />
+          <SlideControl
+            style={{ marginBottom: 30 }}
+            title="Hue"
+            translateX={translateXhue}
+          />
+          <SlideControl
+            style={{ marginBottom: 30 }}
+            title="Saturation"
+            translateX={translateXsaturation}
+          />
+          <SlideControl title="Lightness" translateX={translateXlightness} />
+        </View>
 
-      <StatusBar style="auto" />
-    </View>
+        <StatusBar style="auto" />
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -145,5 +123,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingBottom: 90,
   },
 });
