@@ -1,22 +1,49 @@
-# Reanimated v2 (release candidate) example
+<h4 align="center">
+  <a href="https://en.wikipedia.org/wiki/Hypotrochoid">Hypotrochoid</a> with <a href="https://github.com/software-mansion/react-native-reanimated">React Native Reanimated v2</a> and <a href="https://docs.swmansion.com/react-native-gesture-handler/docs/getting-started.html">React Native Gesture Handler</a>
+</h4>
 
-<p>
-  <!-- iOS -->
-  <img alt="Supports Expo iOS" longdesc="Supports Expo iOS" src="https://img.shields.io/badge/iOS-4630EB.svg?style=flat-square&logo=APPLE&labelColor=999999&logoColor=fff" />
-  <!-- Android -->
-  <img alt="Supports Expo Android" longdesc="Supports Expo Android" src="https://img.shields.io/badge/Android-4630EB.svg?style=flat-square&logo=ANDROID&labelColor=A4C639&logoColor=fff" />
-  <!-- Web -->
+<p align="center">
+  <a href="#information_source-how-to-use">How To Use</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+  <a href="#memo-license">License</a>
 </p>
 
-Experiment with Reanimated 2 (rc) in SDK 40.
+<p align="center">
+  <img alt="" title="" src="animation.gif" width="300px" />
+</p>
 
-## 🚀 How to use
 
-> `npx create-react-native-app my-app -t with-reanimated2`
 
-- Run `yarn` or `npm install`
-- Run [`expo start`](https://docs.expo.io/versions/latest/workflow/expo-cli/), try it out.
+## :information_source: How To Use 🚀
+
+```bash
+# Configure expo (https://expo.io)
+
+# Clone this repository
+$ git clone https://github.com/renatobentorocha/PinchToZoom.git PinchToZoom
+
+# Go into the repository
+$ cd PinchToZoom
+
+# Install dependencies
+$ yarn
+
+# Run the app (iOS)
+$ expo start --ios
+
+# Run the app (Android)
+$ expo start --android
+```
+
+## :memo: License
+This project is under the MIT license. See the [LICENSE](LICENSE) for more information.
 
 ## 📝 Notes
 
 - [react-native-reanimated v2 docs](https://docs.swmansion.com/react-native-reanimated/)
+
+---
+
+Made with ♥ by Renato Rocha :wave: [Get in touch!](https://www.linkedin.com/in/renato-rocha-62146a74/)
+
+
+
